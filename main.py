@@ -77,7 +77,7 @@ def handle_stale_reference(retries=2, delay=2):
 
 
 @handle_stale_reference()
-def selenium_spider(elements):
+def selenium_spider(elements,driver):
     dict_list = []
     # xpath_str='//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/div/div/div/div[4]/div/span[2]/span/span'
     # """
@@ -347,7 +347,7 @@ def iteration(url, driver,num):
                 stuck_num = 0
                 break
         elements_new = [item for item in elements if item not in elements_pre]
-        dict_list.extend(selenium_spider(elements_new))
+        dict_list.extend(selenium_spider(elements_new,driver))
         elements_pre = elements_pre + elements_new
 
         print(len(elements_pre), "elements:", len(elements), "elements_new", len(elements_new))
@@ -377,7 +377,7 @@ def iteration_profile(data_queue, lock, num,with_profile_file,keyword_replace):
     # service = Service(r"C:\Users\Mengyu\Downloads\twitter_spider\twitter_spider\chromedriver.exe")
     # driver = webdriver.Chrome(service=service, options=options)
     driver = webdriver.Chrome(options=options,
-                              executable_path=r"C:\Users\Mengyu\Downloads\chrome\chromedriver.exe")
+                              executable_path=r"C:\Users\Morning\Desktop\hiwi\gpt_score\twitter_spider\twitter_spider\chromedriver.exe")
     # driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     while True:
         try:
@@ -430,7 +430,7 @@ def url_time_test(data_queue, lock, num, without_profile_file,keyword_replace):
         # options.add_argument('--disable-blink-features=AutomationControlled')
         # service=Service(r"C:\Users\Mengyu\Downloads\twitter_spider\twitter_spider\chromedriver.exe")
         # driver = webdriver.Chrome(service=service, options=options)
-        driver = webdriver.Chrome(options=options, executable_path=r"C:\Users\Mengyu\Downloads\chrome\chromedriver.exe")
+        driver = webdriver.Chrome(options=options, executable_path=r"C:\Users\Morning\Desktop\hiwi\gpt_score\twitter_spider\twitter_spider\chromedriver.exe")
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         # keyword_replace=keyword_replace.replace(" ","%20")
         base_url = create_twitter_search_url(keyword_replace)
@@ -560,7 +560,8 @@ def year_percentage(date_str):
 def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
     time_start = time.time()
     without_profile_file = keyword_replace+startdate_set + "_" + enddate_set + "_" + "without_profile.jsonl"
-    with_profile_file = keyword_replace+startdate_set + "_" + enddate_set + "_" + "with_profile.jsonl"
+    # with_profile_file = keyword_replace+startdate_set + "_" + enddate_set + "_" + "with_profile.jsonl"
+    with_profile_file =  "key_word_list_with_profile.jsonl"
 
     threads = []
     missing_list = []

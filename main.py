@@ -77,7 +77,7 @@ def handle_stale_reference(retries=2, delay=2):
 
 
 @handle_stale_reference()
-def selenium_spider(elements,driver):
+def selenium_spider(elements,driver,date_str):
     dict_list = []
     # xpath_str='//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/div/div/div/div[4]/div/span[2]/span/span'
     # """
@@ -93,10 +93,13 @@ def selenium_spider(elements,driver):
             'href')
         # speaker=element.find_element_by_xpath('../../div[1]/div/div[1]/div/div/div[1]/div/a/div/div[1]/span/span').text
         user_name = element.find_element_by_xpath('../../div[1]/div/div[1]/div/div/div[2]/div/div[1]/a/div/span').text
-        time_str = element.find_element_by_xpath(
-            '../../div[1]/div/div[1]/div/div/div[2]/div/div[3]/a/time').get_attribute('datetime')
+        try:
+            time_str = element.find_element_by_xpath(
+                '../../div[1]/div/div[1]/div/div/div[2]/div/div[3]/a/time').get_attribute('datetime')
 
-        print(user_name, time_str)
+            print(user_name, time_str)
+        except:
+            time_str=date_str
         # print(link)
         # liked_str=element.find_element_by_xpath('../../div[3]/div/div[3]/div/div/div[2]/span/span/span').text
         try:
@@ -298,7 +301,7 @@ def get_geo(url, driver):
 
 # selenium_spider()
 @handle_stale_reference()
-def iteration(url, driver,num):
+def iteration(url, driver,num,date_str):
     xpath_str = '/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/div[3]/section/div/div/div/div/div/article/div/div/div[2]/div[2]/div[2]/div'
     old_count = 0
     elements_pre = []
@@ -347,7 +350,7 @@ def iteration(url, driver,num):
                 stuck_num = 0
                 break
         elements_new = [item for item in elements if item not in elements_pre]
-        dict_list.extend(selenium_spider(elements_new,driver))
+        dict_list.extend(selenium_spider(elements_new,driver,date_str))
         elements_pre = elements_pre + elements_new
 
         print(len(elements_pre), "elements:", len(elements), "elements_new", len(elements_new))
@@ -441,7 +444,7 @@ def url_time_test(data_queue, lock, num, without_profile_file,keyword_replace):
         print(url_need)
         print("+++++++++++++++++++++++++++++++++++++++++++++++")
         print("+++++++++++++++++++++++++++++++++++++++++++++++")
-        dict_list = iteration(url_need, driver,num)
+        dict_list = iteration(url_need, driver,num,str(since_date.strftime('%Y-%m-%d')))
         try:
             sum_lines=count_lines(without_profile_file)
         except:

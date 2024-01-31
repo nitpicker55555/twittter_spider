@@ -77,7 +77,7 @@ def handle_stale_reference(retries=2, delay=2):
 
 
 @handle_stale_reference()
-def selenium_spider(elements,driver,date_str):
+def selenium_spider(elements,driver):
     dict_list = []
     # xpath_str='//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/div/div/div/div[4]/div/span[2]/span/span'
     # """
@@ -93,13 +93,10 @@ def selenium_spider(elements,driver,date_str):
             'href')
         # speaker=element.find_element_by_xpath('../../div[1]/div/div[1]/div/div/div[1]/div/a/div/div[1]/span/span').text
         user_name = element.find_element_by_xpath('../../div[1]/div/div[1]/div/div/div[2]/div/div[1]/a/div/span').text
-        try:
-            time_str = element.find_element_by_xpath(
-                '../../div[1]/div/div[1]/div/div/div[2]/div/div[3]/a/time').get_attribute('datetime')
+        time_str = element.find_element_by_xpath(
+            '../../div[1]/div/div[1]/div/div/div[2]/div/div[3]/a/time').get_attribute('datetime')
 
-            print(user_name, time_str)
-        except:
-            time_str=date_str
+        print(user_name, time_str)
         # print(link)
         # liked_str=element.find_element_by_xpath('../../div[3]/div/div[3]/div/div/div[2]/span/span/span').text
         try:
@@ -301,7 +298,7 @@ def get_geo(url, driver):
 
 # selenium_spider()
 @handle_stale_reference()
-def iteration(url, driver,num,date_str):
+def iteration(url, driver,num):
     xpath_str = '/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/div[3]/section/div/div/div/div/div/article/div/div/div[2]/div[2]/div[2]/div'
     old_count = 0
     elements_pre = []
@@ -350,7 +347,7 @@ def iteration(url, driver,num,date_str):
                 stuck_num = 0
                 break
         elements_new = [item for item in elements if item not in elements_pre]
-        dict_list.extend(selenium_spider(elements_new,driver,date_str))
+        dict_list.extend(selenium_spider(elements_new,driver))
         elements_pre = elements_pre + elements_new
 
         print(len(elements_pre), "elements:", len(elements), "elements_new", len(elements_new))
@@ -444,7 +441,7 @@ def url_time_test(data_queue, lock, num, without_profile_file,keyword_replace):
         print(url_need)
         print("+++++++++++++++++++++++++++++++++++++++++++++++")
         print("+++++++++++++++++++++++++++++++++++++++++++++++")
-        dict_list = iteration(url_need, driver,num,str(since_date.strftime('%Y-%m-%d')))
+        dict_list = iteration(url_need, driver,num)
         try:
             sum_lines=count_lines(without_profile_file)
         except:
@@ -532,7 +529,7 @@ def last_date_in_file(file_path):
 
     start_date = datetime.strptime(new_date, "%Y-%m-%d")
 
-    print(new_date)
+    print(new_date,"new_date")
 
     return start_date
 
@@ -573,7 +570,7 @@ def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
     if mode == "content":
         target_func = url_time_test
         try:
-            start_date = last_date_in_file(without_profile_file)
+            start_date = datetime.strptime(startdate_set, "%Y-%m-%d")
             missing_list = missing_dates(without_profile_file)
         except:
             start_date = datetime.strptime(startdate_set, "%Y-%m-%d")
@@ -582,14 +579,15 @@ def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
 
         delta = timedelta(days=1)
         current_date = start_date
-
-        while current_date <= end_date:
-            data_queue.put(current_date)
-            current_date += delta
         if missing_list != []:
             for i in missing_list:
                 data_queue.put(i)
-            print("Adding missing dates", missing_list)
+            print("Adding missing dates", len(missing_list),missing_list)
+        else:
+            while current_date <= end_date:
+                data_queue.put(current_date)
+                current_date += delta
+
         _file = without_profile_file
     elif mode=="profile":
 
@@ -636,19 +634,16 @@ def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
     print("用时: %s hour"%time_sum)
     # os.system("shutdown /s /t 1")
 ai_ethics_topics = [
-    "Artificial Intelligence ethics",
-    "Ethics of AI",
-    "Ethics In AI",
-    "AI for good",
+
     "Ethical AI"
 ]
 # multitask("content", "2023-1-1", "2023-12-31")
 # multitask("profile", "2022-1-1", "2022-12-31")
 # multitask("content", "2021-1-1", "2021-12-31")
 for i in ai_ethics_topics:
-    for time_ in range(15,23):
+    for time_ in range(19,20):
 
-        multitask("content", "20%s-1-1"%time_, "20%s-12-31"%time_,i)
+        multitask("content", "20%s-1-1"%time_, "20%s-5-31"%time_,i)
 # multitask("content", "2020-1-1", "2020-12-31")
 # multitask("profile", "2020-1-1", "2020-12-31")
 # multitask("content", "2019-1-1", "2019-12-31")

@@ -603,7 +603,7 @@ def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
                     keys = list(data.keys())
                     index_reviews_num = keys.index("reviews_num")
                     link_value = data["link"]
-                    sub_dict = {key: data[key] for key in keys[index_reviews_num + 1:]}
+                    sub_dict = {key: data[key] for key in keys[index_reviews_num + 1:]} #只和profile有关的键
                     profile_dict[link_value] = sub_dict
         except:
             pass

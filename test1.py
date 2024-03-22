@@ -14,6 +14,6 @@ def increase_num_in_jsonl(input_file_path, output_file_path, increase_amount=161
             output_file.write(json.dumps(data) + '\n')
 
 # 使用函数
-input_path = r'C:\Users\Morning\Desktop\hiwi\gpt_score\twitter_spider\twitter_spider\new_ethical ai_sentiment.jsonl'
+input_path = r'C:\Users\Morning\Desktop\hiwi\heart\paper\hi_structure\twitter_data2\Ethical_AI2019-1-1_2019-5-31_without_profile_sentiment.jsonl'
 output_path = 'output_file.jsonl'
 increase_num_in_jsonl(input_path, output_path)

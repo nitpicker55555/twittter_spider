@@ -46,7 +46,7 @@ ge42key@mytum.de
 """
 
 # dict_list = []
-profile_dict = {}
+
 
 
 def handle_stale_reference(retries=2, delay=2):
@@ -160,7 +160,7 @@ def simulated_scroll(driver, min_pixels=300, max_pixels=800, steps=5):
 
 
 @handle_stale_reference()
-def get_geo(url, driver):
+def get_profile(url, driver):
     print("get_geo", url)
     if url != "0":
         delay = random.uniform(5, 15)
@@ -257,15 +257,15 @@ def get_geo(url, driver):
 
                 if "Following" in item_.text:
                     # following = item_.find_element_by_xpath('../../span').text
-                    following = re.search(r'(\d[\d,]*) Following', item_.text).group(1)
+                    following = re.search(r'([\d,.K]+) Following', item_.text).group(1)
                     print("following: ", following)
                 if "Followers" in item_.text:
-                    follower = re.search(r'(\d[\d,]*) Followers', item_.text).group(1)
+                    follower = re.search(r'([\d,.K]+) Followers', item_.text).group(1)
                     print("follower: ", follower)
                 if "Subscription" in item_.text:
 
                     # Subscription = item_.find_element_by_xpath('../../span').text
-                    Subscription = re.search(r'(\d[\d,]*) Subscription', item_.text).group(1)
+                    Subscription = re.search(r'([\d,.K]+) Subscription', item_.text).group(1)
                     print("Subscription: ", Subscription)
 
 
@@ -291,7 +291,7 @@ def get_geo(url, driver):
     result_dict = {'UserProfessionalCategory': UserProfessionalCategory, 'UserLocation': UserLocation,
                    'follower': follower, 'following': following, 'Subscription': Subscription,
                    'verified': icon_verified, 'joined_time': joined_time, 'UserUrl': UserUrl,
-                   'UserDescription': UserDescription, 'posts_num': posts_num}
+                   'UserDescription': UserDescription, 'posts_num': posts_num,'link':url}
 
     return result_dict
 
@@ -385,23 +385,17 @@ def iteration_profile(data_queue, lock, num,with_profile_file,keyword_replace):
         except:
             break
 
-        if item_['link'] not in profile_dict:
 
-            profile_dict[item_['link']] = get_geo(item_['link'], driver)
-        else:
-            print("link alreday in.....")
-        item_.update(profile_dict[item_['link']])
-        try:
-            sum_lines=count_lines(with_profile_file)
-        except:
-            sum_lines=0
+        profile_dict = get_profile(item_, driver)
+
+
         # without_profile_file_sum_lines = count_lines(str(with_profile_file).replace("with","without"))
         # process_percentage=(sum_lines/without_profile_file_sum_lines)*100
         # asyncio.run (send_message_to_server(["Processed_file",with_profile_file, "Processed_percentage: {:.2f}%".format(process_percentage),"Processed_lines:",sum_lines]))
 
         with lock:
             with open(with_profile_file, "a") as file:
-                file.write(json.dumps(item_) + "\n")
+                file.write(json.dumps(profile_dict) + "\n")
         data_queue.task_done()
 
 
@@ -559,9 +553,9 @@ def year_percentage(date_str):
 
 def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
     time_start = time.time()
-    without_profile_file = keyword_replace+startdate_set + "_" + enddate_set + "_" + "without_profile.jsonl"
+    without_profile_file = r'C:\Users\Morning\Desktop\hiwi\heart\paper\hi_structure\tem_file\sum_merged_profile.jsonl'
     # with_profile_file = keyword_replace+startdate_set + "_" + enddate_set + "_" + "with_profile.jsonl"
-    with_profile_file =  "key_word_list_with_profile.jsonl"
+    with_profile_file =  r'C:\Users\Morning\Desktop\hiwi\gpt_score\twitter_spider\twitter_spider\sum_merged_profile_new.jsonl'
 
     threads = []
     missing_list = []
@@ -598,25 +592,24 @@ def multitask(mode, startdate_set="", enddate_set="",keyword_replace=""):
             with open(file_path, 'r') as f:
                 for line in f:
                     data = json.loads(line.strip())
-                    processed_list.append(data['content'])  # 避免重复读取
-
-                    keys = list(data.keys())
-                    index_reviews_num = keys.index("reviews_num")
-                    link_value = data["link"]
-                    sub_dict = {key: data[key] for key in keys[index_reviews_num + 1:]} #只和profile有关的键
-                    profile_dict[link_value] = sub_dict
+                    processed_list.append(data['link'])  # 避免重复读取
+                    # keys = list(data.keys())
+                    # link_value = data["link"]
+                    # profile_dict[link_value] = sub_dict
         except:
             pass
         file_path = without_profile_file
         print("processed list: ", len(processed_list))
+
         with open(file_path, 'r') as f:
             for line in f:
                 data = json.loads(line.strip())
-                if data['content'] not in processed_list:
-                    data_queue.put(data)
-                else:
-                    pass
-                    # print("processed item..")
+                if data['posts_num']=='0':
+                    if data['link'] not in processed_list:
+                        data_queue.put(data['link'])
+        #         else:
+        #             pass
+        #             # print("processed item..")
         _file=with_profile_file
     for i in range(6):
         delay = random.uniform(1, 4)
@@ -638,12 +631,12 @@ ai_ethics_topics = [
     "Ethical AI"
 ]
 # multitask("content", "2023-1-1", "2023-12-31")
-# multitask("profile", "2022-1-1", "2022-12-31")
+multitask("profile", "2022-1-1", "2022-12-31")
 # multitask("content", "2021-1-1", "2021-12-31")
-for i in ai_ethics_topics:
-    for time_ in range(19,20):
-
-        multitask("content", "20%s-1-1"%time_, "20%s-5-31"%time_,i)
+# for i in ai_ethics_topics:
+#     for time_ in range(19,20):
+#
+#         multitask("content", "20%s-1-1"%time_, "20%s-5-31"%time_,i)
 # multitask("content", "2020-1-1", "2020-12-31")
 # multitask("profile", "2020-1-1", "2020-12-31")
 # multitask("content", "2019-1-1", "2019-12-31")
